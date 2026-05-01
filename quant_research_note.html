@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Quant Research Note Template</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --navy:    #0D2137;
+    --gold:    #C9913A;
+    --teal:    #0A7E8C;
+    --green:   #1A6B3C;
+    --red:     #8C2020;
+    --purple:  #4A235A;
+    --blue:    #185FA5;
+    --bg:      #ffffff;
+    --bg2:     #f7f7f5;
+    --bg3:     #f0ede8;
+    --text:    #111827;
+    --text2:   #6b7280;
+    --text3:   #9ca3af;
+    --border:  #e5e1da;
+    --border2: #d1cdc4;
+    --radius:  8px;
+    --radius-lg: 12px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'Courier New', monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg:     #1a1a1a;
+      --bg2:    #242424;
+      --bg3:    #2e2e2e;
+      --text:   #f0ede8;
+      --text2:  #a8a49e;
+      --text3:  #6b6760;
+      --border: #383530;
+      --border2:#4a4640;
+    }
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg3);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Top bar ── */
+  .topbar {
+    background: var(--navy);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .brand-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--gold);
+  }
+  .brand-text {
+    font-size: 13px; font-weight: 600;
+    color: #ffffff; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .topbar-right { display: flex; gap: 8px; align-items: center; }
+  .top-btn {
+    font-size: 12px; padding: 6px 14px;
+    border-radius: var(--radius);
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.08);
+    color: #ffffff; cursor: pointer;
+    transition: all 0.15s; font-family: var(--font);
+  }
+  .top-btn:hover { background: rgba(255,255,255,0.16); }
+  .top-btn.primary {
+    background: var(--gold); border-color: var(--gold); color: var(--navy);
+    font-weight: 600;
+  }
+  .top-btn.primary:hover { opacity: 0.9; }
+
+  /* ── Layout ── */
+  .layout {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  /* ── Document header ── */
+  .doc-header {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 28px 32px;
+    margin-bottom: 20px;
+  }
+  .doc-title-input {
+    font-size: 22px; font-weight: 700;
+    color: var(--text); width: 100%;
+    border: none; outline: none;
+    background: transparent;
+    border-bottom: 2px dashed var(--border2);
+    padding-bottom: 8px; margin-bottom: 16px;
+    font-family: var(--font);
+  }
+  .doc-title-input::placeholder { color: var(--text3); }
+  .doc-meta-row {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    align-items: center; justify-content: space-between;
+  }
+  .meta-fields { display: flex; gap: 8px; flex-wrap: wrap; }
+  .meta-field {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; color: var(--text2);
+  }
+  .meta-field input {
+    background: transparent; border: none; outline: none;
+    font-size: 12px; color: var(--text);
+    font-family: var(--font); width: 110px;
+  }
+  .status-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 5px 14px; border-radius: 20px;
+    cursor: pointer; transition: all 0.15s;
+    border: 1.5px solid; letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .s-draft  { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+  .s-review { background: #dbeafe; color: #1e40af; border-color: #3b82f6; }
+  .s-final  { background: #d1fae5; color: #065f46; border-color: #10b981; }
+
+  /* ── Progress ── */
+  .progress-wrap {
+    background: var(--bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 16px 24px;
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .progress-label { font-size: 13px; color: var(--text2); white-space: nowrap; }
+  .progress-track {
+    flex: 1; height: 6px; background: var(--bg3);
+    border-radius: 3px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%; background: var(--gold);
+    border-radius: 3px; transition: width 0.4s ease;
+  }
+  .progress-pct {
+    font-size: 13px; font-weight: 600;
+    color: var(--gold); min-width: 36px; text-align: right;
+  }
+  .section-dots { display: flex; gap: 5px; }
+  .section-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    border: 1.5px solid var(--border2);
+    background: var(--bg2); transition: all 0.2s;
+  }
+  .section-dot.done { background: var(--gold); border-color: var(--gold); }
+
+  /* ── Section card ── */
+  .section-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 12px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .section-card:focus-within { border-color: var(--border2); }
+
+  .section-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px; cursor: pointer;
+    border-bottom: 1px solid transparent;
+    transition: background 0.1s;
+    user-select: none;
+  }
+  .section-header:hover { background: var(--bg2); }
+  .section-header.is-open { border-bottom-color: var(--border); }
+
+  .sec-num {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 700; flex-shrink: 0;
+  }
+  .sec-info { flex: 1; }
+  .sec-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+  .sec-sub   { font-size: 12px; color: var(--text2); }
+  .sec-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--border2);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .sec-check.done { background: #10b981; border-color: #10b981; }
+  .sec-check.done::after {
+    content: ''; display: block;
+    width: 10px; height: 6px;
+    border-left: 2px solid white; border-bottom: 2px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .chevron {
+    width: 18px; height: 18px; color: var(--text3);
+    transition: transform 0.2s; flex-shrink: 0;
+  }
+  .chevron.open { transform: rotate(90deg); }
+
+  .section-body { display: none; padding: 20px; }
+  .section-body.open { display: block; }
+
+  /* ── Fields ── */
+  .field-group { margin-bottom: 18px; }
+  .field-label {
+    display: block; font-size: 11px; font-weight: 600;
+    color: var(--text2); text-transform: uppercase;
+    letter-spacing: 0.06em; margin-bottom: 6px;
+  }
+  .field-hint {
+    font-size: 12px; color: var(--text3);
+    margin-bottom: 6px; line-height: 1.5; font-style: italic;
+  }
+  .field-input {
+    width: 100%; border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 12px;
+    font-size: 13px; color: var(--text);
+    background: var(--bg2); font-family: var(--font);
+    resize: vertical; outline: none;
+    transition: border-color 0.15s; line-height: 1.6;
+  }
+  .field-input:focus { border-color: var(--gold); }
+  .field-input.mono {
+    font-family: var(--mono); font-size: 12px;
+    background: #1a2332; color: #a8d8ea; border-color: #2a3a50;
+  }
+  .field-input.mono:focus { border-color: var(--gold); }
+
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  /* ── Metric boxes ── */
+  .metric-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 10px; margin-bottom: 18px;
+  }
+  .metric-box {
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 12px 14px; text-align: center;
+  }
+  .metric-box-label {
+    font-size: 10px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.05em;
+    margin-bottom: 6px;
+  }
+  .metric-box input {
+    width: 100%; background: transparent; border: none;
+    outline: none; font-size: 20px; font-weight: 700;
+    color: var(--text); text-align: center;
+    font-family: var(--font);
+  }
+  .metric-box input::placeholder { font-size: 14px; color: var(--text3); font-weight: 400; }
+
+  /* ── Tags ── */
+  .tag-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 18px; }
+  .tag {
+    font-size: 12px; padding: 4px 12px; border-radius: 20px;
+    border: 1px dashed var(--border2); color: var(--text2);
+    cursor: pointer; transition: all 0.15s;
+  }
+  .tag.on { border-style: solid; border-color: var(--gold); color: #92400e; background: #fef3c7; }
+
+  /* ── Conviction rating ── */
+  .rating-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
+  .rating-btn {
+    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    border: 1px solid var(--border2); background: var(--bg2);
+    color: var(--text2); cursor: pointer; transition: all 0.15s;
+    font-family: var(--font);
+  }
+  .rating-btn.on-conv { background: #d1fae5; color: #065f46; border-color: #10b981; }
+
+  /* ── Risk checklist ── */
+  .risk-list { list-style: none; margin-bottom: 18px; }
+  .risk-item {
+    display: flex; gap: 10px; align-items: flex-start;
+    padding: 10px 0; border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: background 0.1s;
+  }
+  .risk-item:last-child { border-bottom: none; }
+  .risk-item:hover { background: var(--bg2); margin: 0 -8px; padding: 10px 8px; border-radius: 6px; }
+  .risk-cb {
+    width: 16px; height: 16px; border: 2px solid var(--border2);
+    border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+    transition: all 0.15s; display: flex; align-items: center; justify-content: center;
+  }
+  .risk-cb.on { background: var(--gold); border-color: var(--gold); }
+  .risk-cb.on::after {
+    content: ''; display: block; width: 8px; height: 5px;
+    border-left: 2px solid white; border-bottom: 2px solid white;
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .risk-text { font-size: 13px; color: var(--text); line-height: 1.55; flex: 1; }
+
+  /* ── Helper box ── */
+  .helper-box {
+    background: var(--bg2);
+    border-left: 3px solid var(--gold);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 10px 14px; margin-bottom: 18px;
+    font-size: 12px; color: var(--text2); line-height: 1.65;
+  }
+  .helper-box strong { color: var(--text); font-weight: 600; }
+
+  /* ── Footer action bar ── */
+  .action-bar {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px 24px;
+    display: flex; gap: 10px; flex-wrap: wrap;
+    align-items: center; margin-top: 20px;
+  }
+  .action-bar-label {
+    font-size: 12px; color: var(--text3);
+    flex-basis: 100%; margin-bottom: 4px;
+  }
+  .act-btn {
+    font-size: 13px; padding: 9px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border2);
+    background: var(--bg2); color: var(--text);
+    cursor: pointer; transition: all 0.15s;
+    font-family: var(--font);
+  }
+  .act-btn:hover { background: var(--bg3); border-color: var(--border2); }
+  .act-btn.primary {
+    background: var(--navy); color: var(--gold);
+    border-color: var(--navy); font-weight: 600;
+  }
+  .act-btn.primary:hover { opacity: 0.9; }
+  .act-btn.success {
+    background: var(--gold); color: var(--navy);
+    border-color: var(--gold); font-weight: 600;
+  }
+
+  /* ── Print styles ── */
+  @media print {
+    .topbar, .action-bar, .progress-wrap { display: none; }
+    body { background: white; }
+    .layout { max-width: 100%; padding: 0; }
+    .section-body { display: block !important; }
+    .section-card { break-inside: avoid; border: 1px solid #ccc; margin-bottom: 16px; }
+    .doc-header { border: 1px solid #ccc; }
+    .field-input { border: 1px solid #ddd; }
+    .field-input.mono { background: #f5f5f5; color: #333; }
+  }
+
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 24px; right: 24px;
+    background: var(--navy); color: white;
+    padding: 12px 20px; border-radius: var(--radius);
+    font-size: 13px; font-weight: 500;
+    transform: translateY(80px); opacity: 0;
+    transition: all 0.3s; z-index: 9999;
+    border-left: 3px solid var(--gold);
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 600px) {
+    .layout { padding: 16px 12px 60px; }
+    .doc-header { padding: 20px 16px; }
+    .metric-grid { grid-template-columns: repeat(2, 1fr); }
+    .field-row { grid-template-columns: 1fr; }
+    .topbar { padding: 12px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-dot"></div>
+    <span class="brand-text">Quant Research Note</span>
+  </div>
+  <div class="topbar-right">
+    <button class="top-btn" onclick="printNote()">Print / PDF</button>
+    <button class="top-btn" onclick="copyText()">Copy text</button>
+    <button class="top-btn" onclick="saveJSON()">Save draft</button>
+    <button class="top-btn" onclick="loadJSON()">Load draft</button>
+    <button class="top-btn primary" onclick="exportNote()">Export report</button>
+  </div>
+</div>
+
+<!-- Main layout -->
+<div class="layout">
+
+  <!-- Document header -->
+  <div class="doc-header">
+    <input class="doc-title-input" id="docTitle"
+      placeholder="Strategy name — e.g.  Short-Term Momentum on NSE F&amp;O Stocks" />
+    <div class="doc-meta-row">
+      <div class="meta-fields">
+        <div class="meta-field">
+          Author &nbsp;
+          <input id="metaAuthor" placeholder="Your name" />
+        </div>
+        <div class="meta-field">
+          Date &nbsp;
+          <input id="metaDate" type="date" style="width:130px" />
+        </div>
+        <div class="meta-field">
+          Ver &nbsp;
+          <input id="metaVer" placeholder="v1.0" style="width:44px" />
+        </div>
+      </div>
+      <div id="statusBadge" class="status-badge s-draft" onclick="cycleStatus()" title="Click to change status">
+        Draft
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <span class="progress-label" id="progLabel">0 / 7 sections complete</span>
+    <div class="progress-track">
+      <div class="progress-fill" id="progFill" style="width:0%"></div>
+    </div>
+    <span class="progress-pct" id="progPct">0%</span>
+    <div class="section-dots" id="secDots"></div>
+  </div>
+
+  <!-- Sections rendered here -->
+  <div id="sectionsWrap"></div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <div class="action-bar-label">Actions — when note is complete</div>
+    <button class="act-btn primary" onclick="exportNote()">Export full report</button>
+    <button class="act-btn success" onclick="printNote()">Print / Save PDF</button>
+    <button class="act-btn" onclick="saveJSON()">Save draft (JSON)</button>
+    <button class="act-btn" onclick="copyText()">Copy plain text</button>
+    <button class="act-btn" onclick="clearAll()">Clear all</button>
+  </div>
+
+</div>
+
+<!-- Toast notification -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input for load -->
+<input type="file" id="fileInput" accept=".json" style="display:none" onchange="onFileLoad(event)" />
+
+<script>
+// ── Data ─────────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  {
+    num: 1, color: '#0D2137', bg: '#D0DCE8', textColor: '#0D2137',
+    title: 'Hypothesis',
+    subtitle: 'Why should this alpha exist?',
+    helper: '<strong>Tip from Grinold & Kahn:</strong> The best alpha hypotheses come from one of three sources: (1) a behavioural bias causing systematic mispricing, (2) a structural risk premium investors are paid to bear, or (3) an information advantage. State clearly which one your strategy exploits.',
+    fields: [
+      { id:'hyp_core', label:'Core hypothesis', hint:'Complete this: "This alpha exists because…" — be very specific.', type:'textarea', rows:3,
+        ph:'e.g. Stocks with the highest 12-1 month return continue to outperform over the next month because institutional investors are slow to incorporate momentum signals, creating a persistent drift.' },
+      { id:'hyp_theory', label:'Economic / behavioural rationale', hint:'What market inefficiency or risk premium does this exploit?', type:'textarea', rows:3,
+        ph:'e.g. Underreaction to information (Jegadeesh & Titman 1993). Investors anchor to past prices and update slowly. Creates predictable drift in the direction of recent returns.' },
+      { id:'hyp_prior', label:'Supporting academic evidence', hint:'Name 1–2 papers that support your hypothesis.', type:'input',
+        ph:'e.g. Jegadeesh & Titman (1993); Asness, Moskowitz & Pedersen (2013)' },
+      { id:'hyp_original', label:'What is original about your version?', hint:'How does your signal differ from the published paper?', type:'textarea', rows:2,
+        ph:'e.g. Applied to NSE F&O universe instead of US equities. Signal computed weekly. Sector-neutral construction.' },
+    ]
+  },
+  {
+    num: 2, color: '#0A7E8C', bg: '#D0EDF0', textColor: '#0A7E8C',
+    title: 'Data & Universe',
+    subtitle: 'What data, date range, asset class',
+    fields: [
+      { id:'data_src', label:'Data source', type:'input',
+        ph:'e.g. NSE OHLCV via Zerodha Kite API / Yahoo Finance yfinance / Alpaca Markets paper account' },
+      { id:'data_universe', label:'Asset universe', hint:'How many instruments, what selection criteria?', type:'textarea', rows:2,
+        ph:'e.g. NSE F&O eligible stocks (~180 names). Filter: min 6 months history, min avg daily turnover ₹5 cr, price > ₹20.' },
+      { id:'data_range', label:'Date range', type:'input',
+        ph:'e.g. 01 Jan 2018 — 31 Dec 2023  (6 years, 1,504 trading days)' },
+      { id:'data_freq', label:'Data frequency', type:'input',
+        ph:'e.g. Daily OHLCV. Intraday 5-min used for execution analysis only.' },
+      { id:'data_issues', label:'Data issues & how you handled them', hint:'Corporate actions, survivorship bias, missing data — document every decision.', type:'textarea', rows:4,
+        ph:'e.g. Survivorship bias: used point-in-time NSE F&O eligible list (monthly snapshots). Splits/bonuses: adjusted via Zerodha adjustment factor. Missing data: forward-fill up to 3 days, then excluded from signal that day.' },
+    ]
+  },
+  {
+    num: 3, color: '#1A6B3C', bg: '#D4EDDA', textColor: '#1A6B3C',
+    title: 'Signal Construction',
+    subtitle: 'Exact formula — reproducible by anyone',
+    tags: ['Equities','Fixed Income','Commodities','FX','Crypto','Derivatives','ETF','Multi-asset'],
+    fields: [
+      { id:'sig_formula', label:'Signal formula (exact)', hint:'Another quant must be able to reproduce this from your description alone.', type:'textarea', rows:5, mono:true,
+        ph:'Signal_i,t = (P_i,t-21 / P_i,t-252) - 1\n\nWhere:\n  P_i,t = adjusted closing price of stock i on day t\n  Formation window = 252 days (12 months)\n  Skip period   = 21 days (1 month, avoids short-term reversal)\n  Normalised cross-sectionally: z_i,t = (Signal_i,t - mean_t) / std_t' },
+      { id:'sig_portfolio', label:'Portfolio construction', hint:'How do you go from signal score to position weights?', type:'textarea', rows:3,
+        ph:'e.g. Every 21 trading days: rank all stocks by signal. Long top quintile (Q5), short bottom quintile (Q1). Equal weight within each side. Dollar neutral: long book = short book = ₹1 (normalised).' },
+      { id:'sig_rebal', label:'Rebalance frequency & execution', type:'input',
+        ph:'e.g. Monthly on first trading day. Execute at next-day open price to avoid lookahead bias.' },
+      { id:'sig_costs', label:'Transaction costs assumed', type:'input',
+        ph:'e.g. 10 bps round-trip (5 bps bid-ask + 5 bps market impact). STT, GST, stamp duty excluded from base case. Sensitivity run at 20 bps.' },
+    ]
+  },
+  {
+    num: 4, color: '#8C2020', bg: '#FADADD', textColor: '#8C2020',
+    title: 'Backtest Results',
+    subtitle: 'Equity curve, Sharpe, drawdown',
+    metrics: true,
+    fields: [
+      { id:'bt_period', label:'Backtest period', type:'input',
+        ph:'e.g. Jan 2018 — Dec 2023  (IS: 2018–2021 / OOS held-out: 2022–2023)' },
+      { id:'bt_equity', label:'Equity curve description', hint:'Shape of the curve — steady? Regime-dependent? Note drawdown periods.', type:'textarea', rows:3,
+        ph:'e.g. Steady upward 2018–2020. Sharp drawdown Mar–Apr 2020 (COVID, –18%). Strong recovery 2020–2021. Flat in 2022 rising-rate environment. Chart: [attach equity_curve.png]' },
+      { id:'bt_yearly', label:'Annual return breakdown', type:'textarea', rows:5, mono:true,
+        ph:'2018:  +12.3%\n2019:  +18.7%\n2020:   –4.1%   (COVID drawdown)\n2021:  +22.4%\n2022:   +3.2%\n2023:  +15.1%' },
+      { id:'bt_notes', label:'Key observations', hint:'When does the strategy work? When does it fail?', type:'textarea', rows:3,
+        ph:'e.g. Underperforms sharply during high-vol regimes (VIX > 30). Tech-heavy during bull markets (concentration risk). Best in trending low-vol environments.' },
+    ]
+  },
+  {
+    num: 5, color: '#4A235A', bg: '#EAD9F5', textColor: '#4A235A',
+    title: 'Out-of-Sample Test',
+    subtitle: 'Walk-forward or held-out period',
+    fields: [
+      { id:'oos_method', label:'OOS methodology', hint:'How did you ensure no lookahead bias?', type:'textarea', rows:3,
+        ph:'e.g. Walk-forward: train 3 years, test 1 year, roll forward 1 year. 3 OOS windows: 2019, 2020–2021, 2022–2023. Signal parameters fixed across all windows — no re-optimisation between windows.' },
+      { id:'oos_results', label:'OOS results vs in-sample', type:'textarea', rows:5, mono:true,
+        ph:'                  In-Sample    OOS\nAnn. Return:        +16.8%    +11.2%\nAnn. Volatility:    +14.2%    +15.8%\nSharpe Ratio:         1.18      0.71\nMax Drawdown:       –18.4%    –24.1%\nWin Rate:            56.2%     53.1%' },
+      { id:'oos_decay', label:'Performance decay analysis', hint:'How much did Sharpe drop? Is the decay acceptable?', type:'textarea', rows:3,
+        ph:'e.g. Sharpe decayed 1.18 → 0.71 (40% decay). Within expected range for a momentum strategy. Main causes: (1) regime change 2022, (2) increased crowding, (3) realistic costs in OOS.' },
+      { id:'oos_conclusion', label:'OOS conclusion — do you trust this?', type:'textarea', rows:2,
+        ph:'e.g. Cautiously yes. Strategy robust to walk-forward with no re-fitting. 2022 weakness needs further investigation before live deployment.' },
+    ]
+  },
+  {
+    num: 6, color: '#C9913A', bg: '#FDF0DC', textColor: '#854F0B',
+    title: 'Live Paper Results',
+    subtitle: 'Actual paper trading PnL',
+    fields: [
+      { id:'live_system', label:'Live system description', hint:'How is the signal generated and executed in paper trading?', type:'textarea', rows:3,
+        ph:'e.g. Python script on DigitalOcean VPS. Alpaca Markets paper account ($100k starting). Signal computed at market close via yfinance. Orders placed at next open via Alpaca REST API. Monthly rebalance.' },
+      { id:'live_period', label:'Live paper trading period', type:'input',
+        ph:'e.g. 01 March 2024 — ongoing  (currently 3 months / 63 trading days)' },
+      { id:'live_pnl', label:'Live PnL summary', type:'textarea', rows:5, mono:true,
+        ph:'Start capital:    $100,000\nCurrent value:    $103,420\nTotal return:      +3.42%  (vs SPY benchmark: +5.1%)\nAnn. Sharpe:        0.62   (limited data — 3 months)\nMax drawdown:      –4.8%\nTrade count:        47 round trips\nAvg slippage obs:   8.2 bps  (vs 10 bps assumed)' },
+      { id:'live_diff', label:'Key differences from backtest', hint:'What surprised you? What worked differently in live paper trading?', type:'textarea', rows:4,
+        ph:'e.g. 1. Signal fired correctly on 94% of rebalance dates. 2. Actual slippage better than assumed (8 vs 10 bps). 3. One API timeout — added retry logic. 4. Strategy underperforming SPY during strong uptrend — consistent with backtest pattern.' },
+      { id:'live_log', label:'PnL log location (GitHub link)', type:'input',
+        ph:'e.g. github.com/yourname/live-trading/blob/main/logs/pnl_daily.csv' },
+    ]
+  },
+  {
+    num: 7, color: '#185FA5', bg: '#B5D4F4', textColor: '#0C447C',
+    title: 'Risks & Limitations',
+    subtitle: 'Where it breaks down — be honest',
+    checklist: true,
+    fields: [
+      { id:'risk_main', label:'Primary risks (ranked by severity)', hint:'Top 3–5 risks. Be specific — not generic "market risk".', type:'textarea', rows:6,
+        ph:'1. REGIME RISK (High): Momentum strategy will suffer –25 to –35% drawdown in a momentum crash (e.g. Sep 2009, Apr 2020 pattern). No regime filter in current version.\n\n2. CROWDING RISK (Medium): NSE F&O universe is small (~180 names). Heavy institutional momentum chasing could reduce alpha or amplify drawdowns.\n\n3. LIQUIDITY RISK (Low at current size): At >₹5 crore AUM, market impact costs in smaller names may erode net alpha significantly.' },
+      { id:'risk_where', label:'Where the strategy fails', type:'textarea', rows:3,
+        ph:'e.g. Fails in: (1) high-vol regimes (VIX > 25), (2) sudden sector rotation, (3) momentum crashes, (4) rising rate environments where capital rotates from growth to value.' },
+      { id:'risk_improve', label:'What you would research next', hint:'If you had more time, what would you test?', type:'textarea', rows:3,
+        ph:'e.g. 1. Add regime filter: turn off when 20-day rolling cross-stock correlation > 0.7. 2. Sector-neutral construction to reduce factor concentration. 3. Earnings-adjusted momentum signal.' },
+      { id:'risk_verdict', label:'Final verdict — would you trade with real capital?', hint:'Be honest. A weak strategy honestly described is more impressive than a perfect one with no limitations.', type:'textarea', rows:3,
+        ph:'e.g. Paper trade only for now. Would consider small live allocation (₹2–5 lakh) after 6 months of paper confirmation and regime filter implemented. Not ready for external capital without a longer live track record.' },
+    ]
+  }
+];
+
+const STATUS_CYCLE = [
+  { label: 'Draft',     cls: 's-draft'  },
+  { label: 'In Review', cls: 's-review' },
+  { label: 'Final',     cls: 's-final'  },
+];
+let statusIdx = 0;
+
+// ── Status ────────────────────────────────────────────────────────────────────
+function cycleStatus() {
+  statusIdx = (statusIdx + 1) % STATUS_CYCLE.length;
+  const b = document.getElementById('statusBadge');
+  b.className = 'status-badge ' + STATUS_CYCLE[statusIdx].cls;
+  b.textContent = STATUS_CYCLE[statusIdx].label;
+}
+
+// ── Build DOM ─────────────────────────────────────────────────────────────────
+function buildSections() {
+  const wrap = document.getElementById('sectionsWrap');
+  const dotsWrap = document.getElementById('secDots');
+
+  SECTIONS.forEach(s => {
+    // Progress dot
+    const dot = document.createElement('div');
+    dot.className = 'section-dot';
+    dot.id = 'dot_' + s.num;
+    dot.title = 'Section ' + s.num + ': ' + s.title;
+    dotsWrap.appendChild(dot);
+
+    // Card
+    const card = document.createElement('div');
+    card.className = 'section-card';
+    card.id = 'card_' + s.num;
+
+    // Header
+    const hdr = document.createElement('div');
+    hdr.className = 'section-header';
+    hdr.id = 'hdr_' + s.num;
+    hdr.onclick = () => toggle(s.num);
+
+    const numBadge = document.createElement('div');
+    numBadge.className = 'sec-num';
+    numBadge.style.cssText = `background:${s.bg};color:${s.textColor}`;
+    numBadge.textContent = s.num;
+
+    const info = document.createElement('div');
+    info.className = 'sec-info';
+    info.innerHTML = `<div class="sec-title">${s.title}</div><div class="sec-sub">${s.subtitle}</div>`;
+
+    const check = document.createElement('div');
+    check.className = 'sec-check';
+    check.id = 'check_' + s.num;
+
+    const chev = document.createElement('div');
+    chev.innerHTML = `<svg id="chev_${s.num}" class="chevron" viewBox="0 0 20 20" fill="none"><path d="M7 10l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M7 6l4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+    hdr.append(numBadge, info, check, chev.firstChild);
+    card.appendChild(hdr);
+
+    // Body
+    const body = document.createElement('div');
+    body.className = 'section-body';
+    body.id = 'body_' + s.num;
+
+    // Helper box
+    if (s.helper) {
+      const h = document.createElement('div');
+      h.className = 'helper-box';
+      h.innerHTML = s.helper;
+      body.appendChild(h);
+    }
+
+    // Tags
+    if (s.tags) {
+      const tl = document.createElement('div');
+      tl.className = 'field-label';
+      tl.textContent = 'Asset class';
+      body.appendChild(tl);
+      const tr = document.createElement('div');
+      tr.className = 'tag-row';
+      s.tags.forEach(t => {
+        const tg = document.createElement('div');
+        tg.className = 'tag';
+        tg.textContent = t;
+        tg.onclick = () => { tg.classList.toggle('on'); checkDone(s.num); };
+        tr.appendChild(tg);
+      });
+      body.appendChild(tr);
+    }
+
+    // Metrics
+    if (s.metrics) {
+      const mg = document.createElement('div');
+      mg.className = 'metric-grid';
+      [
+        ['Ann. Return',  'bt_ret',    '+0.00%'],
+        ['Ann. Vol',     'bt_vol',    '0.00%'],
+        ['Sharpe Ratio', 'bt_sharpe', '0.00'],
+        ['Max Drawdown', 'bt_dd',     '−0.00%'],
+        ['Win Rate',     'bt_wr',     '0.0%'],
+        ['Calmar Ratio', 'bt_calmar', '0.00'],
+      ].forEach(([lbl, id, ph]) => {
+        const box = document.createElement('div');
+        box.className = 'metric-box';
+        box.innerHTML = `<div class="metric-box-label">${lbl}</div><input id="${id}" placeholder="${ph}" oninput="checkDone(${s.num})" />`;
+        mg.appendChild(box);
+      });
+      body.appendChild(mg);
+
+      const cl = document.createElement('div');
+      cl.className = 'field-label';
+      cl.textContent = 'Conviction level';
+      body.appendChild(cl);
+      const cr = document.createElement('div');
+      cr.className = 'rating-row';
+      ['Low','Medium','High','Very High'].forEach(v => {
+        const b = document.createElement('button');
+        b.className = 'rating-btn';
+        b.textContent = v;
+        b.onclick = () => {
+          cr.querySelectorAll('.rating-btn').forEach(x => x.classList.remove('on-conv'));
+          b.classList.add('on-conv');
+          checkDone(s.num);
+        };
+        cr.appendChild(b);
+      });
+      body.appendChild(cr);
+    }
+
+    // Fields
+    s.fields.forEach(f => {
+      const g = document.createElement('div');
+      g.className = 'field-group';
+
+      const lbl = document.createElement('label');
+      lbl.className = 'field-label';
+      lbl.textContent = f.label;
+      g.appendChild(lbl);
+
+      if (f.hint) {
+        const hint = document.createElement('div');
+        hint.className = 'field-hint';
+        hint.textContent = f.hint;
+        g.appendChild(hint);
+      }
+
+      if (f.type === 'textarea') {
+        const ta = document.createElement('textarea');
+        ta.className = 'field-input' + (f.mono ? ' mono' : '');
+        ta.id = f.id;
+        ta.rows = f.rows || 3;
+        ta.placeholder = f.ph || '';
+        ta.oninput = () => checkDone(s.num);
+        g.appendChild(ta);
+      } else {
+        const inp = document.createElement('input');
+        inp.type = 'text';
+        inp.className = 'field-input';
+        inp.id = f.id;
+        inp.placeholder = f.ph || '';
+        inp.oninput = () => checkDone(s.num);
+        g.appendChild(inp);
+      }
+      body.appendChild(g);
+    });
+
+    // Risk checklist
+    if (s.checklist) {
+      const cl = document.createElement('div');
+      cl.className = 'field-label';
+      cl.style.marginTop = '4px';
+      cl.textContent = 'Pre-submission checklist — confirm each item';
+      body.appendChild(cl);
+
+      const risks = [
+        'Regime risk documented with worst-case drawdown estimate',
+        'Transaction cost sensitivity done (base case + stressed scenario)',
+        'OOS period covers at least one market stress event',
+        'Survivorship bias explicitly handled in data construction',
+        'Strategy capacity estimated — at what AUM does alpha decay?',
+        'Correlation to known factors checked (MKT, MOM, HML, SMB)',
+        'Live paper results consistent with backtest predictions',
+        'Identified the single most likely reason this strategy will fail',
+      ];
+      const ul = document.createElement('ul');
+      ul.className = 'risk-list';
+      risks.forEach((r, i) => {
+        const li = document.createElement('li');
+        li.className = 'risk-item';
+        li.innerHTML = `<div class="risk-cb" id="rcb_${i}"></div><span class="risk-text">${r}</span>`;
+        li.onclick = () => {
+          document.getElementById('rcb_' + i).classList.toggle('on');
+          checkDone(s.num);
+        };
+        ul.appendChild(li);
+      });
+      body.appendChild(ul);
+    }
+
+    card.appendChild(body);
+    wrap.appendChild(card);
+  });
+
+  // Open first section by default
+  toggle(1);
+}
+
+// ── Toggle ────────────────────────────────────────────────────────────────────
+function toggle(num) {
+  SECTIONS.forEach(s => {
+    const body = document.getElementById('body_' + s.num);
+    const hdr  = document.getElementById('hdr_' + s.num);
+    const chev = document.getElementById('chev_' + s.num);
+    if (s.num === num) {
+      const isOpen = body.classList.contains('open');
+      body.classList.toggle('open', !isOpen);
+      hdr.classList.toggle('is-open', !isOpen);
+      if (chev) chev.classList.toggle('open', !isOpen);
+    } else {
+      body.classList.remove('open');
+      hdr.classList.remove('is-open');
+      if (chev) chev.classList.remove('open');
+    }
+  });
+}
+
+// ── Completion check ──────────────────────────────────────────────────────────
+function checkDone(num) {
+  const s = SECTIONS.find(x => x.num === num);
+  let filled = 0;
+  s.fields.forEach(f => {
+    const el = document.getElementById(f.id);
+    if (el && el.value.trim().length > 8) filled++;
+  });
+  const done = filled === s.fields.length;
+  document.getElementById('check_' + num).classList.toggle('done', done);
+  document.getElementById('dot_'   + num).classList.toggle('done', done);
+  updateProgress();
+}
+
+function updateProgress() {
+  let done = 0;
+  SECTIONS.forEach(s => {
+    if (document.getElementById('check_' + s.num).classList.contains('done')) done++;
+  });
+  const pct = Math.round((done / SECTIONS.length) * 100);
+  document.getElementById('progFill').style.width = pct + '%';
+  document.getElementById('progPct').textContent  = pct + '%';
+  document.getElementById('progLabel').textContent = done + ' / ' + SECTIONS.length + ' sections complete';
+}
+
+// ── Gather all field values ───────────────────────────────────────────────────
+function gatherData() {
+  const data = {
+    title:  document.getElementById('docTitle').value,
+    author: document.getElementById('metaAuthor').value,
+    date:   document.getElementById('metaDate').value,
+    ver:    document.getElementById('metaVer').value,
+    status: STATUS_CYCLE[statusIdx].label,
+    sections: {}
+  };
+  SECTIONS.forEach(s => {
+    data.sections[s.num] = {};
+    s.fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (el) data.sections[s.num][f.id] = el.value;
+    });
+    if (s.metrics) {
+      ['bt_ret','bt_vol','bt_sharpe','bt_dd','bt_wr','bt_calmar'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) data.sections[s.num][id] = el.value;
+      });
+    }
+  });
+  return data;
+}
+
+// ── Save / Load JSON ──────────────────────────────────────────────────────────
+function saveJSON() {
+  const data = gatherData();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (data.title || 'research_note').replace(/\s+/g,'_') + '_draft.json';
+  a.click();
+  toast('Draft saved as JSON file');
+}
+
+function loadJSON() {
+  document.getElementById('fileInput').click();
+}
+
+function onFileLoad(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const data = JSON.parse(ev.target.result);
+      document.getElementById('docTitle').value   = data.title  || '';
+      document.getElementById('metaAuthor').value = data.author || '';
+      document.getElementById('metaDate').value   = data.date   || '';
+      document.getElementById('metaVer').value    = data.ver    || '';
+      if (data.sections) {
+        SECTIONS.forEach(s => {
+          const sd = data.sections[s.num] || {};
+          s.fields.forEach(f => {
+            const el = document.getElementById(f.id);
+            if (el && sd[f.id] !== undefined) el.value = sd[f.id];
+          });
+          if (s.metrics) {
+            ['bt_ret','bt_vol','bt_sharpe','bt_dd','bt_wr','bt_calmar'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el && sd[id] !== undefined) el.value = sd[id];
+            });
+          }
+          checkDone(s.num);
+        });
+      }
+      toast('Draft loaded successfully');
+    } catch(err) { toast('Could not load file — invalid JSON'); }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// ── Copy plain text ───────────────────────────────────────────────────────────
+function copyText() {
+  const d = gatherData();
+  let txt = d.title + '\n' + '═'.repeat(Math.min(d.title.length, 60)) + '\n';
+  txt += 'Author: ' + (d.author||'—') + '  |  Date: ' + (d.date||'—') + '  |  Status: ' + d.status + '\n\n';
+  SECTIONS.forEach(s => {
+    txt += s.num + '. ' + s.title.toUpperCase() + '\n' + '─'.repeat(40) + '\n';
+    s.fields.forEach(f => {
+      const val = (d.sections[s.num]||{})[f.id];
+      if (val && val.trim()) txt += f.label + ':\n' + val.trim() + '\n\n';
+    });
+    if (s.metrics) {
+      const m = d.sections[s.num] || {};
+      txt += 'Key Metrics:\n';
+      [['Annual Return','bt_ret'],['Annual Vol','bt_vol'],['Sharpe','bt_sharpe'],
+       ['Max Drawdown','bt_dd'],['Win Rate','bt_wr'],['Calmar','bt_calmar']].forEach(([l,id]) => {
+        if (m[id]) txt += '  ' + l + ': ' + m[id] + '\n';
+      });
+      txt += '\n';
+    }
+    txt += '\n';
+  });
+  navigator.clipboard.writeText(txt).then(() => toast('Copied to clipboard'));
+}
+
+// ── Export full report ────────────────────────────────────────────────────────
+function exportNote() {
+  const d = gatherData();
+  let html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>${d.title || 'Research Note'}</title>
+<style>
+  body{font-family:'Segoe UI',sans-serif;max-width:860px;margin:40px auto;padding:0 24px;color:#111;line-height:1.7}
+  h1{font-size:24px;border-bottom:3px solid #C9913A;padding-bottom:12px;margin-bottom:8px}
+  .meta{font-size:13px;color:#666;margin-bottom:32px}
+  h2{font-size:16px;font-weight:700;color:#0D2137;margin:28px 0 6px;padding-left:10px;border-left:4px solid #C9913A}
+  h3{font-size:13px;font-weight:600;color:#444;margin:16px 0 4px;text-transform:uppercase;letter-spacing:0.05em}
+  p,pre{font-size:14px;margin-bottom:12px}
+  pre{background:#f5f5f5;padding:12px;border-radius:6px;white-space:pre-wrap;font-family:'Courier New',monospace;font-size:12px;border-left:3px solid #C9913A}
+  .metric-row{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0}
+  .metric-box{background:#f7f7f5;border:1px solid #e5e1da;border-radius:8px;padding:10px 16px;text-align:center;min-width:100px}
+  .metric-val{font-size:20px;font-weight:700;color:#0D2137}
+  .metric-lbl{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:0.05em}
+  .section{border:1px solid #e5e1da;border-radius:10px;padding:20px 24px;margin-bottom:20px}
+  @media print{body{margin:20px}.section{break-inside:avoid}}
+</style></head><body>`;
+
+  html += `<h1>${d.title || 'Quant Research Note'}</h1>`;
+  html += `<div class="meta">Author: ${d.author||'—'} &nbsp;|&nbsp; Date: ${d.date||'—'} &nbsp;|&nbsp; Version: ${d.ver||'v1.0'} &nbsp;|&nbsp; Status: ${d.status}</div>`;
+
+  SECTIONS.forEach(s => {
+    html += `<div class="section"><h2>${s.num}. ${s.title}</h2>`;
+    if (s.metrics) {
+      const m = d.sections[s.num] || {};
+      html += `<div class="metric-row">`;
+      [['Annual Return','bt_ret'],['Annual Vol','bt_vol'],['Sharpe','bt_sharpe'],
+       ['Max DD','bt_dd'],['Win Rate','bt_wr'],['Calmar','bt_calmar']].forEach(([l,id]) => {
+        const v = m[id]||'—';
+        html += `<div class="metric-box"><div class="metric-val">${v}</div><div class="metric-lbl">${l}</div></div>`;
+      });
+      html += `</div>`;
+    }
+    s.fields.forEach(f => {
+      const val = ((d.sections[s.num]||{})[f.id]||'').trim();
+      if (!val) return;
+      html += `<h3>${f.label}</h3>`;
+      if (f.mono) html += `<pre>${val}</pre>`;
+      else html += `<p>${val.replace(/\n/g,'<br>')}</p>`;
+    });
+    html += `</div>`;
+  });
+
+  html += `<p style="font-size:11px;color:#aaa;margin-top:40px;text-align:center">Generated by Quant Research Note Template</p></body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (d.title||'research_note').replace(/\s+/g,'_') + '_report.html';
+  a.click();
+  toast('Report exported — open in browser to print as PDF');
+}
+
+// ── Print ─────────────────────────────────────────────────────────────────────
+function printNote() {
+  SECTIONS.forEach(s => {
+    document.getElementById('body_' + s.num).classList.add('open');
+  });
+  window.print();
+}
+
+// ── Clear ─────────────────────────────────────────────────────────────────────
+function clearAll() {
+  if (!confirm('Clear all fields? This cannot be undone.')) return;
+  document.getElementById('docTitle').value = '';
+  document.getElementById('metaAuthor').value = '';
+  document.getElementById('metaDate').value = '';
+  document.getElementById('metaVer').value = '';
+  SECTIONS.forEach(s => {
+    s.fields.forEach(f => {
+      const el = document.getElementById(f.id);
+      if (el) el.value = '';
+    });
+    checkDone(s.num);
+  });
+  toast('All fields cleared');
+}
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+buildSections();
+document.getElementById('metaDate').value = new Date().toISOString().split('T')[0];
+</script>
+</body>
+</html>
